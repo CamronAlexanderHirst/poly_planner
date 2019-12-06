@@ -6,6 +6,11 @@ from shapely.geometry import Point
 from math import radians, cos, sin
 
 
+class RRT_statesampler
+    def __init__(self, xBounds, yBounds):
+
+
+
 class RRT_tree:
     def __init__(self, root):
         self.nodes = []
@@ -21,7 +26,7 @@ class RRT_node:
         self.control = control
 
     def dist_to(point):
-        return self.state.distance(point)
+        return self.location.distance(point)
 
 
 class RRT_edge:
