@@ -3,7 +3,7 @@ Utility Functions for stoichastic polygons
 Assume:
     - polygon velocities are time invariant
 """
-from Shapely import MultiPoint, Point
+from shapely.geometry import MultiPoint, Point
 
 
 class poly:
