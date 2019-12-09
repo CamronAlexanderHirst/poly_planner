@@ -9,10 +9,9 @@ from math import radians, cos, sin
 
 class RRT_statesampler:
 
-    def __init__(self, xBounds, yBounds, tBounds, Goal, pGoal):
+    def __init__(self, xBounds, yBounds, Goal, pGoal):
         self.xBounds = xBounds
         self.yBounds = yBounds
-        self.tBounds = tBounds
         self.Goal = Goal
         self.pGoal = pGoal
 
@@ -22,7 +21,6 @@ class RRT_statesampler:
             return self.Goal
         x = np.random.uniform(self.xBounds[0], self.xBounds[1])
         y = np.random.uniform(self.yBounds[0], self.yBounds[1])
-        t = np.random.uniform(self.tBounds[0], self.tBounds[1])
         return Point(x, y)
 
 
@@ -32,7 +30,7 @@ class RRT_controlsampler:
         self.controls = controls
 
     def sample(self):
-        u = np.random.choice(self.controls)
+        u =  np.random.uniform(self.controls[0], self.controls[-1])
         return u
 
 
@@ -79,9 +77,9 @@ class RRT_node:
     def dist_to(self, point):
         return self.location.distance(point)
 
-    def state_dist_to(self, state2):
-        self.state = state
-        for i in range(len(state)):
+    # def state_dist_to(self, state2):
+    #     self.state = state
+    #     for i in range(len(state)):
 
 
 class RRT_edge:
@@ -146,7 +144,9 @@ class unicycle_model:
         y = y0 + dt*v*sin(theta0)
         theta = theta0 + dt*control
         if theta < 0:
-            theta = theta + 2*math.pi
+           theta = theta + 2*math.pi
+
+
         new_state = [x, y, theta]
 
         return new_state
