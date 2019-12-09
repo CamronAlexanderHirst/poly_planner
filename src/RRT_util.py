@@ -9,14 +9,20 @@ from math import radians, cos, sin
 
 class RRT_statesampler:
 
-    def __init__(self, xBounds, yBounds):
+    def __init__(self, xBounds, yBounds, tBounds, Goal, pGoal):
         self.xBounds = xBounds
         self.yBounds = yBounds
+        self.tBounds = tBounds
+        self.Goal = Goal
+        self.pGoal = pGoal
 
     def sample(self):
+        s = np.random.uniform()
+        if s < self.pGoal:
+            return self.Goal
         x = np.random.uniform(self.xBounds[0], self.xBounds[1])
         y = np.random.uniform(self.yBounds[0], self.yBounds[1])
-
+        t = np.random.uniform(self.tBounds[0], self.tBounds[1])
         return Point(x, y)
 
 
@@ -46,7 +52,7 @@ class RRT_tree:
         for node in self.nodes:
             d = node.dist_to(point)
             if d < d_opt:
-                d = d_opt
+                d_opt = d
                 node_opt = node
         return node_opt
 
@@ -73,19 +79,25 @@ class RRT_node:
     def dist_to(self, point):
         return self.location.distance(point)
 
+    def state_dist_to(self, state2):
+        self.state = state
+        for i in range(len(state)):
+
 
 class RRT_edge:
 
-    def __init__(self, parent, child, control):
+    def __init__(self, parent, child, control, path):
         self.parent = parent
         self.child = child
         self.control = control
+        self.path = path
 
 
 class unicycle_model:
 
-    def __init__(self, speed, obs_space):
+    def __init__(self, speed, obs_space, region):
         self.speed = speed
+        self.region = region
         self.obs_space = obs_space
         self.turn_limit = radians(30)
 
@@ -99,8 +111,8 @@ class unicycle_model:
         for i in range(n):
             #print("state in traj:", state)
             state = self.prop_state(state, control, dt)
-            in_obs = self.check_in_obs(state)
-            if not in_obs:
+            in_region = self.check_in_region(state)
+            if in_region:
                 edge_path.append(state)
             else:
                 return False, None, None, None
@@ -108,12 +120,21 @@ class unicycle_model:
         final_point = Point(state[0], state[1])
         return True, x_final, final_point, edge_path
 
+
     def check_in_obs(self, state):
         point = Point(state[0], state[1])
         for obs in self.obs_space:
             if obs.contains(point):
                 return True
         return False
+
+    def check_in_region(self, state):
+        point = Point(state[0], state[1])
+        if self.region.contains(point):
+            return True
+        return False
+
+
 
     def prop_state(self, state, control, dt):
         # first order Euler integration.
@@ -124,8 +145,8 @@ class unicycle_model:
         x = x0 + dt*v*cos(theta0)
         y = y0 + dt*v*sin(theta0)
         theta = theta0 + dt*control
-
-
+        if theta < 0:
+            theta = theta + 2*math.pi
         new_state = [x, y, theta]
 
         return new_state
