@@ -68,18 +68,15 @@ class RRT_tree:
 
 
 class RRT_node:
-
-    def __init__(self, state, index):
+    def __init__(self, state, index, time):
         self.state = state
         self.index = index
         self.location = Point(state[0], state[1])
+        self.time = time
 
     def dist_to(self, point):
         return self.location.distance(point)
 
-    # def state_dist_to(self, state2):
-    #     self.state = state
-    #     for i in range(len(state)):
 
 
 class RRT_edge:
@@ -91,32 +88,37 @@ class RRT_edge:
         self.path = path
 
 
+
 class unicycle_model:
 
-    def __init__(self, speed, obs_space, region):
+    def __init__(self, speed, obs_space, region, PPC):
         self.speed = speed
         self.region = region
         self.obs_space = obs_space
         self.turn_limit = radians(30)
+        self.PPC = PPC
 
     def traj_gen(self, near_node, u_samp, t):
         n = 10
         dt = t/n
+        t_0 = near_node.time
         state = near_node.state
-        #print("state in traj_gen:", state)
         control = u_samp
         edge_path = [state]
         for i in range(n):
-            #print("state in traj:", state)
             state = self.prop_state(state, control, dt)
             in_region = self.check_in_region(state)
             if in_region:
                 edge_path.append(state)
             else:
-                return False, None, None, None
+                return False, None, None, None, None
         x_final = state
+        t_final = t_0 + t
+        in_poly = self.PPC.check_prob_threshold(x_final, t_final)
+        if not in_poly:
+            return False, None, None, None, None
         final_point = Point(state[0], state[1])
-        return True, x_final, final_point, edge_path
+        return True, x_final, final_point, edge_path, t_final
 
 
     def check_in_obs(self, state):
@@ -126,12 +128,26 @@ class unicycle_model:
                 return True
         return False
 
+
     def check_in_region(self, state):
         point = Point(state[0], state[1])
         if self.region.contains(point):
             return True
         return False
 
+
+    def check_in_poly(self, state):
+        point = Point(state[0], state[1])
+        i = 0
+        for poly in self.poly_list:
+            if poly.contains(point):
+                i = i + 1
+
+        prob = i/len(self.poly_list)
+        if prob > threshold_prob:
+            return True
+        else:
+            return False
 
 
     def prop_state(self, state, control, dt):
