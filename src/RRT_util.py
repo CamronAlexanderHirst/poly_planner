@@ -57,6 +57,7 @@ class RRT_tree:
     def path_from_start(self, node_index):
         i = node_index
         path = []
+        path.append(self.nodes[node_index])
         while True:
             parent_index = self.parents[i]
             path.append(self.nodes[parent_index])
