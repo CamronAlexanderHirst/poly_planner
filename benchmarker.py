@@ -103,14 +103,14 @@ for run in range(num_runs):
         print("Runtime (s): ",runtime)
 
         # save the benchmarking data
-        dict = {'runtime': runtime, 'path length':path_length,
-                'number of nodes': number_of_nodes}
+        dict = {'runtime': runtime, 'pathlength':path_length,
+                'numbernodes': number_of_nodes}
         rows_list.append(dict)
     else:
         print('No data collected - runtime too long')
-        dict = {'runtime': runtime, 'path length':None,
-                'number of nodes': None}
+        dict = {'runtime': runtime, 'pathlength':None,
+                'numbernodes': None}
         rows_list.append(dict)
 
 df = pd.DataFrame(rows_list)
-df.to_pickle("benchmarking_results/benchmark.pkl")
+df.to_pickle("benchmarking_results/benchmark_1.pkl")
