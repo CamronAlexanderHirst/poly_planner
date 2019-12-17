@@ -7,3 +7,12 @@ Alex Hirst
 Dependencies:
 - Python3
 - Shapely
+- Numpy
+- Matplotlib
+- pandas
+
+To run:
+Main script:
+"python3 main.py"
+Benchmarking Script:
+"python3 benchmarker.py"
